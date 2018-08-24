@@ -1,0 +1,3 @@
+[submodule "lz4"]
+	path = lz4
+	url = git@github.com:synapse-garden/lz4.git
