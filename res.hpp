@@ -1,14 +1,13 @@
 #include <cstddef>
+#include <memory>
 
-#include "lz4frame.h"
+#include "lz4.h"
 
 namespace res {
     class Res {
     public:
-        Res() noexcept(true);
-	~Res() noexcept(false);
 	// Len returns the required size for the target buffer.
-        size_t Len() noexcept(true);
+	size_t Len() noexcept(true);
 
 	// Read ingests up to len bytes into the target buffer.  If the
 	// user passes a NULL target, the Res will create an internally-
@@ -17,18 +16,15 @@ namespace res {
 	//
 	// If the user passes a buffer with sufficient size, the
 	// returned buffer is the one which was passed in.
-	// 
+	//
 	// If the user passes a buffer with insufficient size, the
 	// behavior is undefined.
 	const char* Read(char* into, size_t len) noexcept(true);
 
     private:
-	 // TODO: lz4.h streaming. LZ4F_dctx* context;
-	 std::unique_ptr<char> internal_buffer;
+	std::unique_ptr<char> internal_buffer;
 
-	 static const unsigned char buf[];
-	 static const size_t b_comp_len;
+	static const unsigned char buf[];
+	static const size_t        b_comp_len;
     };
-
-    // TODO: lz4.h streaming. size_t lookup_block_size(LZ4F_blockSizeID_t);
-};
+}; // namespace res

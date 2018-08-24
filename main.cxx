@@ -3,14 +3,13 @@
 #include "res.hpp"
 
 int main() {
-     auto r = res::Res();
+    res::Res r;
+    auto     len = r.Len();
+    std::cout << "Expect: " << len << std::endl;
 
-     auto len = r.Len();
-     std::cout << "Expect: " << len << std::endl;
+    char into[len];
 
-     char into[len];
+    std::cout << r.Read(into, len) << std::endl;
 
-     std::cout << r.Read(into, len) << std::endl;
-
-     return 0;
+    return 0;
 }
