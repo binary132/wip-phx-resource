@@ -8,6 +8,8 @@ add_subdirectory(lz4/lib)
 add_library(Res STATIC res.cxx res.hpp)
 target_include_directories(Res PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${LZ4_INCLUDE_DIR})
 target_link_libraries(Res LZ4)
+set_property(TARGET Res PROPERTY CXX_STANDARD 11)
+set_property(TARGET Res PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_executable(foo main.cxx)
 target_link_libraries(foo Res)

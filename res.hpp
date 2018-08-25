@@ -9,17 +9,18 @@ namespace res {
 	// Len returns the required size for the target buffer.
 	size_t Len() noexcept(true);
 
-	// Read ingests up to len bytes into the target buffer.  If the
-	// user passes a NULL target, the Res will create an internally-
-	// managed buffer to store the decompressed resource, which will
-	// be automatically deleted when the Res is destroyed.
+	// Read ingests up to len bytes into the target buffer.  If
+	// the user passes a NULL target, the Res will create an
+	// internally- managed buffer to store the decompressed
+	// resource, which will be automatically deleted when the Res
+	// is destroyed.
 	//
 	// If the user passes a buffer with sufficient size, the
 	// returned buffer is the one which was passed in.
 	//
 	// If the user passes a buffer with insufficient size, the
 	// behavior is undefined.
-	const char* Read(char* into, size_t len) noexcept(true);
+	const char* Read(char* into, size_t len) noexcept(false);
 
     private:
 	std::unique_ptr<char> internal_buffer;
