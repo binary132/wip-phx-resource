@@ -85,6 +85,7 @@ namespace res {
 	    }
 	    if (errOrMore == 0) {
 		// When the header is 0-sized, we're done.
+		// TODO: This should never happen, double-check.
 		return into;
 	    }
 
