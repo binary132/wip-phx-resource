@@ -3,20 +3,17 @@
 #include "res.hpp"
 
 int main() {
-    res::Res r;
-    auto     len = r.Len();
-    // std::cout << "Expect: " << len << std::endl;
-
-    char into[len];
     try {
-	r.Read(into, len);
+	res::Res r;
+	auto     len = r.Len();
+	char     into[len];
+	auto     out = r.Read(into, len);
+	std::cout << "Decoded successfully:" << std::endl
+	          << out << std::endl;
     } catch (const char* s) {
-	std::cout << s << std::endl;
+	std::cout << "Exception: " << s << std::endl;
 	return 1;
     }
-    fwrite(into, sizeof(char), len, stdout);
-    fflush(stdout);
-    // std::cout << r.Read(into, len) << std::endl;
 
     return 0;
 }
