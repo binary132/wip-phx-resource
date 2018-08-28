@@ -88,7 +88,8 @@ namespace res {
 
     const size_t Res::Read(char* into, size_t len) noexcept(false) {
 	size_t more      = 0;
-	size_t dstSize   = len;
+	size_t dstSize   = 0;
+	size_t remain    = len;
 	size_t written   = 0;
 	size_t errOrMore = 0;
 
@@ -121,6 +122,8 @@ namespace res {
 	    // of bytes	consumed.
 	    more = errOrMore;
 
+	    dstSize = remain;
+
 	    // Consume the frame into the destination.
 	    errOrMore =
 	      LZ4F_decompress(decoder, into + written, &dstSize,
@@ -145,7 +148,7 @@ namespace res {
 
 	    // Store the remaining size of the output buffer "into" in
 	    // dstSize for the next call to LZ4F_decompress.
-	    dstSize -= dstSize;
+	    remain -= dstSize;
 	}
 
 	return written;
