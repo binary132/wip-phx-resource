@@ -12,16 +12,12 @@ namespace res {
 	Res() noexcept(false);
 	~Res() noexcept(false);
 
-	// MaxBlockSize returns the ideal size of a block which may be
-	// consumed by a partial Read.  Read will fill as much as is
-	// given, but the performance is best if the full Len() is
-	// allocated, or if blocks of MaxBlockSize are used.
-	//
-	// If a size_t is passed, MaxBlockSize sets its value to the
-	// next buffer size to pass to Read.  If this size is 0, the
-	// Res is done reading.
+	// MaxBlockSize returns the maximum required size of a block
+	// which may be written to by a single partial Read.  Read will
+	// fill as much as is given, but the performance is best if the
+	// full Len() is allocated, or if blocks of MaxBlockSize are
+	// used.
 	const size_t MaxBlockSize() noexcept(false);
-	const size_t MaxBlockSize(size_t&) noexcept(false);
 
 	// Read ingests up to len bytes into the target buffer.  The
 	// user may pass a buffer smaller than the full decompressed
@@ -38,6 +34,7 @@ namespace res {
     private:
 	LZ4F_dctx* decoder;
 	size_t     consumed;
+	size_t     next_read_size;
 
 	static const unsigned char buf[];
 	static const size_t        b_comp_len;

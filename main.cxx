@@ -7,32 +7,31 @@ int main() {
     try {
 	res::Res r;
 
-	auto   len   = r.Len();
-	auto   total = 0;
-	size_t next  = 0;
+	auto len   = r.Len();
+	auto total = 0;
 
 	// "next" will be set to the expected next read size, bsz is the
 	// maximum size of the decompressed block.
-	auto bsz = r.MaxBlockSize(next);
+	auto bsz = r.MaxBlockSize();
 
 	// We can assume block max size doesn't change since we encoded
 	// the resource in a single pass.
 	char into[bsz];
 
-	while (next != 0 && total < len) {
+	bool done = false;
+
+	while (!done && total < len) {
 	    // count is the number of bytes actually consumed into
-	    // "into".  It should always match "next".
-	    auto count = r.Read(into, next);
-	    if (count != next) {
-		// Something went wrong?
-		throw "weird";
+	    // "into".  Read up to one full block (bsz.)
+	    auto count = r.Read(into, bsz);
+	    if (count == 0) {
+		// We finished reading.  I'd be surprised if we ever hit
+		// this.
+		done = true;
 	    }
 
 	    total += count;
-	    fwrite(into, sizeof(char), next, stdout);
-
-	    // Get size of the next block.
-	    r.MaxBlockSize(next);
+	    fwrite(into, sizeof(char), count, stdout);
 	}
     } catch (const char* s) {
 	std::cout << "Exception: " << s << std::endl;

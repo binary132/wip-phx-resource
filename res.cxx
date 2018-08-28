@@ -59,17 +59,14 @@ namespace res {
 	    return 2 << 21;
 	default:
 	    return 2 << 21;
-	} // namespace res
+	}
     }
 
     const size_t Res::MaxBlockSize() noexcept(false) {
-	size_t meh = 0;
-	return MaxBlockSize(meh);
-    }
-
-    const size_t Res::MaxBlockSize(size_t& next) noexcept(false) {
 	LZ4F_frameInfo_t frame = _noFrame;
-	size_t           more  = LZ4F_HEADER_SIZE_MAX;
+
+	// "more" is how much max will be parsed from buf as the header.
+	size_t more = LZ4F_HEADER_SIZE_MAX;
 
 	auto errOrNext =
 	  LZ4F_getFrameInfo(decoder, &frame, buf + consumed, &more);
@@ -77,78 +74,52 @@ namespace res {
 	    throw LZ4F_getErrorName(errOrNext);
 	}
 
-	// "more" is how much was read from buf.
+	// "more" is now how much was read from buf.
 	consumed += more;
 
-	// "err" is the expected size of the next read.
-	next = errOrNext;
+	// "errOrNext" is the expected size of the next read.
+	next_read_size = errOrNext;
 
 	return lookupBlkSize(frame.blockSizeID);
     }
 
     const size_t Res::Read(char* into, size_t len) noexcept(false) {
-	size_t more      = 0;
-	size_t dstSize   = 0;
-	size_t remain    = len;
-	size_t written   = 0;
-	size_t errOrMore = 0;
+	size_t intoSize = len;
+	size_t more     = next_read_size;
+	size_t written  = 0;
+	bool   done     = false;
 
-	LZ4F_frameInfo_t frame;
+	// Precalculate the size of the next read.
+	MaxBlockSize();
 
-	bool done = false;
-
-	while (!done && written < len) {
-	    // Reset and decode the next (or current) frame's header.
-	    // TODO: Just do this once in the constructor.
-	    frame = _noFrame;
-	    more  = LZ4F_HEADER_SIZE_MAX;
-
-	    errOrMore =
-	      LZ4F_getFrameInfo(decoder, &frame, buf + consumed, &more);
-	    if (LZ4F_isError(more)) {
-		throw LZ4F_getErrorName(more);
-	    }
-	    if (errOrMore == 0) {
-		// When the next block is 0-sized, we're done.
-		return written;
-	    }
-
-	    // "more" is now the count of bytes consumed from buf by
-	    // LZ4F_getFrameInfo.
-	    consumed += more;
-
-	    // "errOrMore" is now the size of the block+header expected
-	    // by LZ4F_decompress as "srcSizePtr", to control the number
-	    // of bytes	consumed.
-	    more = errOrMore;
-
-	    dstSize = remain;
-
+	while (!done && more > 0 && written < len) {
 	    // Consume the frame into the destination.
-	    errOrMore =
-	      LZ4F_decompress(decoder, into + written, &dstSize,
+	    auto errOrMore =
+	      LZ4F_decompress(decoder, into + written, &intoSize,
 	                      buf + consumed, &more, NULL);
 	    if (LZ4F_isError(errOrMore)) {
 		throw LZ4F_getErrorName(errOrMore);
 	    }
 	    if (errOrMore == 0) {
-		// When the header is 0-sized, we're done.
-		// TODO: This should never happen, double-check.
+		// TODO: Maybe there's a better way to do this?
 		done = true;
 	    }
 
+	    // "intoSize" is now the amount actually decoded into
+	    // "into", so add it to the total written.
+	    written += intoSize;
+
+	    // Reset "intoSize" to the remaining target buffer for the
+	    // next call.
+	    intoSize = len - written;
+
 	    // After decoding the block, "more" is the count of bytes
 	    // consumed, in that call, from the internal compressed
-	    // buffer source.  Add this to the total offset.
+	    // buffer source.  Add this to the total internal offset.
 	    consumed += more;
 
-	    // dstSize is now the number of bytes written, by this call,
-	    // into the output buffer "into".  Add it to the total.
-	    written += dstSize;
-
-	    // Store the remaining size of the output buffer "into" in
-	    // dstSize for the next call to LZ4F_decompress.
-	    remain -= dstSize;
+	    // errOrMore is the ideal next read size.
+	    more = next_read_size = errOrMore;
 	}
 
 	return written;
@@ -156,6 +127,7 @@ namespace res {
 
     void Res::Reset() noexcept(true) {
 	LZ4F_resetDecompressionContext(decoder);
-	consumed = 0;
+
+	consumed = next_read_size = 0;
     }
 }; // namespace res
