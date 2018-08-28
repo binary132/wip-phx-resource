@@ -18,7 +18,8 @@ namespace res {
 	// allocated, or if blocks of MaxBlockSize are used.
 	//
 	// If a size_t is passed, MaxBlockSize sets its value to the
-	// next buffer size to pass to Read.
+	// next buffer size to pass to Read.  If this size is 0, the
+	// Res is done reading.
 	const size_t MaxBlockSize() noexcept(false);
 	const size_t MaxBlockSize(size_t&) noexcept(false);
 
