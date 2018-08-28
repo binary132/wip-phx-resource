@@ -69,7 +69,7 @@ namespace res {
 
     const size_t Res::MaxBlockSize(size_t& next) noexcept(false) {
 	LZ4F_frameInfo_t frame = _noFrame;
-	size_t           more  = 0;
+	size_t           more  = LZ4F_HEADER_SIZE_MAX;
 
 	auto errOrNext =
 	  LZ4F_getFrameInfo(decoder, &frame, buf + consumed, &more);
@@ -131,7 +131,7 @@ namespace res {
 	    if (errOrMore == 0) {
 		// When the header is 0-sized, we're done.
 		// TODO: This should never happen, double-check.
-		return written + dstSize;
+		done = true;
 	    }
 
 	    // After decoding the block, "more" is the count of bytes

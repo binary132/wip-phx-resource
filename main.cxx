@@ -31,7 +31,7 @@ int main() {
 	    total += count;
 	    fwrite(into, sizeof(char), next, stdout);
 
-	    // Read one more full block.
+	    // Get size of the next block.
 	    r.MaxBlockSize(next);
 	}
     } catch (const char* s) {
