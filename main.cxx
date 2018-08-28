@@ -7,34 +7,38 @@ int main() {
     try {
 	res::Res r;
 
-	auto len   = r.Len();
-	auto total = 0;
+	auto   len   = r.Len();
+	auto   total = 0;
+	size_t next  = 0;
 
-	// Allocate full buffer.
-	// char     into[len];
+	// "next" will be set to the expected next read size, bsz is the
+	// maximum size of the decompressed block.
+	auto bsz = r.MaxBlockSize(next);
 
-	while (total < len) {
-	    // Allocate partial buffer.
-	    size_t next = 0;
-	    auto   bsz  = r.BlockSize(next);
-	    char   into[bsz];
+	// We can assume block max size doesn't change since we encoded
+	// the resource in a single pass.
+	char into[bsz];
 
-	    // memset(into, 0, len);
+	while (next != 0 && total < len) {
+	    // count is the number of bytes actually consumed into
+	    // "into".  It should always match "next".
+	    auto count = r.Read(into, next);
+	    if (count != next) {
+		// Something went wrong?
+		throw "weird";
+	    }
 
-	    auto count = 0;
-
-	    // count is the number of bytes actually consumed.
-	    count = r.Read(into, bsz - count);
 	    total += count;
+	    fwrite(into, sizeof(char), next, stdout);
 
-	    fwrite(into, sizeof(char), count, stdout);
+	    // Read one more full block.
+	    r.MaxBlockSize(next);
 	}
-
-	fflush(stdout);
     } catch (const char* s) {
 	std::cout << "Exception: " << s << std::endl;
 	return 1;
     }
 
+    fflush(stdout);
     return 0;
 }
