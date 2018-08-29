@@ -1,18 +1,22 @@
 #include <cstring>
 #include <iostream>
 
-#include "res.hpp"
+#include "mapper.hpp"
+#include "resource.hpp"
+
+using res::ID;
+using res::Mapper;
 
 int main() {
     try {
-	res::Res r;
+	auto r = Mapper::Fetch(ID::dat_txt);
 
-	auto len   = r.Len();
+	auto len   = r->Len();
 	auto total = 0;
 
 	// "next" will be set to the expected next read size, bsz is the
 	// maximum size of the decompressed block.
-	auto bsz = r.MaxBlockSize();
+	auto bsz = r->BlockSize();
 
 	// We can assume block max size doesn't change since we encoded
 	// the resource in a single pass.
@@ -23,7 +27,7 @@ int main() {
 	while (!done && total < len) {
 	    // count is the number of bytes actually consumed into
 	    // "into".  Read up to one full block (bsz.)
-	    auto count = r.Read(into, bsz);
+	    auto count = r->Read(into, bsz);
 	    if (count == 0) {
 		// We finished reading.  I'd be surprised if we ever hit
 		// this.
