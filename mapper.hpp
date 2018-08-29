@@ -1,6 +1,7 @@
 #ifndef PHX_RES_MAPPER
 #define PHX_RES_MAPPER
 
+#include <memory>
 #include <map>
 
 #include "id.hpp"
