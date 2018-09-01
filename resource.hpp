@@ -1,9 +1,6 @@
 #ifndef PHX_RES
 #define PHX_RES
 
-// #include <cstddef>
-// #include <memory> ?
-
 #include "lz4frame.h"
 
 namespace res {
